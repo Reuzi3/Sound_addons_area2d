@@ -30,7 +30,19 @@ func play_sound(audio_name: String, fade_in_duration: float = 0.6):
 
 	var sound_entry: SoundEntry = audio_clips[audio_name]
 
-	# Se for BGM, aplica lógica de transição
+	# Ajuste de tempos de início e fim
+	var start_time = sound_entry.start_time
+	var end_time = sound_entry.end_time if sound_entry.end_time > 0 else sound_entry.audio.get_length()
+	var duration = end_time - start_time
+
+	if duration <= 0:
+		print("Error: Invalid start_time or end_time for:", audio_name)
+		return
+
+	# Verifica se é um AudioStreamRandomizer
+	if sound_entry.audio is AudioStreamRandomizer:
+		print("Playing AudioStreamRandomizer:", audio_name)
+
 	if sound_entry.BGM:
 		if audio_name == current_audio_name:
 			return  # Já está tocando essa BGM
@@ -45,7 +57,7 @@ func play_sound(audio_name: String, fade_in_duration: float = 0.6):
 		sound_player.stream = sound_entry.audio
 		sound_player.volume_db = -80.0  # Inicia mudo para fazer fade in
 		sound_player.pitch_scale = sound_entry.audio_pitch if sound_entry.audio_pitch != 0 else default_pitch
-		sound_player.play()
+		sound_player.play(start_time)
 		active_players.append(sound_player)
 
 		# Atualiza o nome da BGM atual
@@ -54,21 +66,42 @@ func play_sound(audio_name: String, fade_in_duration: float = 0.6):
 		# Fade in para o volume desejado
 		fade_in(sound_player, sound_entry.audio_volume if sound_entry.audio_volume != 0 else default_volume, fade_in_duration)
 
-		# Remove o player quando o som terminar
-		sound_player.finished.connect(func():
-			active_players.erase(sound_player)
-			sound_player.queue_free())
+		# Timer para interromper o áudio no end_time
+		if end_time < sound_entry.audio.get_length():
+			var timer = Timer.new()
+			timer.one_shot = true
+			timer.wait_time = duration
+			add_child(timer)
+			timer.timeout.connect(func():
+				if is_instance_valid(sound_player):
+					sound_player.stop()
+					active_players.erase(sound_player)
+					sound_player.queue_free())
+			timer.start()
 	else:
-		# Para SFX, toca imediatamente sem fade
+		# Para SFX ou outros tipos, toca imediatamente respeitando start_time e end_time
 		var sound_player = create_audio_stream_player()
 		add_child(sound_player)
 		sound_player.stream = sound_entry.audio
 		sound_player.volume_db = linear_to_db(sound_entry.audio_volume)
 		sound_player.pitch_scale = sound_entry.audio_pitch
-		sound_player.play()
+		sound_player.play(start_time)
 		active_players.append(sound_player)
 
-		# Remove o player quando o som terminar
+		# Timer para interromper o áudio no end_time
+		if end_time < sound_entry.audio.get_length():
+			var timer = Timer.new()
+			timer.one_shot = true
+			timer.wait_time = duration
+			add_child(timer)
+			timer.timeout.connect(func():
+				if is_instance_valid(sound_player):
+					sound_player.stop()
+					active_players.erase(sound_player)
+					sound_player.queue_free())
+			timer.start()
+
+		# Remove o player quando o som terminar (se não houver end_time definido)
 		sound_player.finished.connect(func():
 			active_players.erase(sound_player)
 			sound_player.queue_free())
