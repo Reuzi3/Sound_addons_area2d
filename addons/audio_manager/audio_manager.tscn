@@ -1,0 +1,35 @@
+[gd_scene load_steps=9 format=3 uid="uid://c00623ghoudr"]
+
+[ext_resource type="Script" path="res://addons/audio_manager/AudioManager.gd" id="1_ig3wi"]
+[ext_resource type="Script" path="res://addons/audio_manager/SoundEntry.gd" id="2_lt2pd"]
+[ext_resource type="AudioStream" uid="uid://3c8dsh36452l" path="res://Arcadia (1).mp3" id="3_6f7e3"]
+[ext_resource type="AudioStream" uid="uid://c1yt5wrondydu" path="res://Lonely Souls.mp3" id="4_vddw1"]
+[ext_resource type="AudioStream" uid="uid://c5xycefk7xhr3" path="res://cartoon-jump-6462.mp3" id="5_3k2d2"]
+
+[sub_resource type="Resource" id="Resource_a32y7"]
+script = ExtResource("2_lt2pd")
+audio_name = "Arcadia"
+BGM = true
+audio = ExtResource("3_6f7e3")
+audio_volume = 0.2
+audio_pitch = 1.0
+
+[sub_resource type="Resource" id="Resource_2s1j7"]
+script = ExtResource("2_lt2pd")
+audio_name = "Lonely"
+BGM = true
+audio = ExtResource("4_vddw1")
+audio_volume = 1.0
+audio_pitch = 1.0
+
+[sub_resource type="Resource" id="Resource_1rahb"]
+script = ExtResource("2_lt2pd")
+audio_name = "Jump"
+BGM = false
+audio = ExtResource("5_3k2d2")
+audio_volume = 1.0
+audio_pitch = 1.0
+
+[node name="AudioManager" type="Node2D"]
+script = ExtResource("1_ig3wi")
+sounds = Array[ExtResource("2_lt2pd")]([SubResource("Resource_a32y7"), SubResource("Resource_2s1j7"), SubResource("Resource_1rahb")])
