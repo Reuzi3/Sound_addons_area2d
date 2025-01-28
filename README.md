@@ -1,4 +1,4 @@
 # Godot-MusicArea
  
 
- Meu custom Plugin para gerenciar e acionar sons, baseado em Area.
+Custom Plugin for area2d Sound manager..
